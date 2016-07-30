@@ -29,7 +29,12 @@ class TestPacketHandler < Minitest::Test
   end
 
   def test_write_packet
-    packet = ConnectPacket.new
+    packet = ConnectPacket.new client_id: 'abc'
+    @handler.write_packet packet
+    @socket.rewind
+    assert_equal 0x10, @socket.readbyte # packet type and flags
+    assert_equal 0x0F, @socket.readbyte # encoded length
+    assert_equal @socket.read, packet.encode
   end
 
   def test_length_decoding

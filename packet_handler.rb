@@ -17,6 +17,8 @@ PACKET_CLASSES = { 1 => ConnectPacket,
 PACKET_CODES = PACKET_CLASSES.invert
 
 class PacketHandler
+  include BinHelper
+
   MAX_LENGTH_MULTIPLIER = 128 ** 3
 
   def initialize stream
@@ -34,7 +36,7 @@ class PacketHandler
 
   def write_packet packet
     type_and_flags = PACKET_CODES[packet.class] << 4
-    type_and_flags =+ packet.flags
+    type_and_flags += packet.flags
     @stream.write uchar(type_and_flags)
     encoded_packet = packet.encode
     @stream.write encode_length(encoded_packet.length)
