@@ -15,7 +15,7 @@ PACKET_CLASSES = { 1 => ConnectPacket,
                    13 => PingrespPacket,
                    14 => DisconnectPacket }
 
-class PacketReader
+class PacketHandler
   MAX_LENGTH_MULTIPLIER = 128 ** 3
 
   def initialize stream
