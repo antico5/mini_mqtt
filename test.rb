@@ -25,13 +25,11 @@ class TestPacketReader < Minitest::Test
   def test_get_packet
     packet = @reader.get_packet
     assert_equal ConnectPacket, packet.class
-    assert_equal 0b0000, packet.flags
-    assert_equal "", packet.body
+    assert_equal 0, packet.length
 
     packet = @reader.get_packet
     assert_equal UnsubscribePacket, packet.class
-    assert_equal 0b0010, packet.flags
-    assert_equal "topic", packet.body
+    assert_equal 5, packet.length
   end
 
   def test_length_decoding

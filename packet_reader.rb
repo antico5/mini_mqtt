@@ -27,8 +27,7 @@ class PacketReader
     @packet_class = PACKET_CLASSES[ first_byte >> 4 ]
     @flags = first_byte & 0xf
     @length = decode_length @stream
-    @body = @stream.read @length
-    @packet_class.new @body, @flags
+    @packet_class.new.decode @stream, @length
   end
 
   private
