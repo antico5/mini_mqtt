@@ -1,4 +1,5 @@
 class Packet
+  attr_reader :body, :flags
   def initialize body, flags = 0
     @body = body
     @flags = flags
