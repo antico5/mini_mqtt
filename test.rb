@@ -1,7 +1,7 @@
 $:.unshift File.dirname __FILE__
 require 'minitest/autorun'
 require 'pry'
-require 'packet_reader'
+require 'packet_handler'
 require 'packet'
 
 
@@ -11,33 +11,33 @@ class String
   end
 end
 
-class TestPacketReader < Minitest::Test
+class TestPacketHandler < Minitest::Test
   def setup
     @socket = StringIO.new
-    connect_packet_bytes = "\x10\x00"
-    unsubscribe_packet_bytes = "\xa2\x05topic"
-    @socket.write connect_packet_bytes
-    @socket.write unsubscribe_packet_bytes
-    @socket.rewind
-    @reader = PacketReader.new @socket
+    @handler = PacketHandler.new @socket
   end
 
   def test_get_packet
-    packet = @reader.get_packet
+    @socket.write "\x10\x00"
+    @socket.write "\xa2\x05topic"
+    @socket.rewind
+    packet = @handler.get_packet
     assert_equal ConnectPacket, packet.class
-    assert_equal 0, packet.length
 
-    packet = @reader.get_packet
+    packet = @handler.get_packet
     assert_equal UnsubscribePacket, packet.class
-    assert_equal 5, packet.length
+  end
+
+  def test_write_packet
+    packet = ConnectPacket.new
   end
 
   def test_length_decoding
-    assert_equal 321, @reader.send(:decode_length, "\xC1\x02".to_stream)
-    assert_equal 16384, @reader.send(:decode_length, "\x80\x80\x01".to_stream)
-    assert_equal 268_435_455, @reader.send(:decode_length, "\xFF\xFF\xFF\x7F".to_stream)
+    assert_equal 321, @handler.send(:decode_length, "\xC1\x02".to_stream)
+    assert_equal 16384, @handler.send(:decode_length, "\x80\x80\x01".to_stream)
+    assert_equal 268_435_455, @handler.send(:decode_length, "\xFF\xFF\xFF\x7F".to_stream)
     assert_raises StandardError do
-      @reader.send(:decode_length, "\xFF\xFF\xFF\xFF".to_stream)
+      @handler.send(:decode_length, "\xFF\xFF\xFF\xFF".to_stream)
     end
   end
 
@@ -74,5 +74,14 @@ class ConnectPacketTest < MiniTest::Test
     assert_equal [0x02], encoded[7].bytes
     assert_equal "\x00\x0F", encoded[8..9]
     assert_equal "\x00\x03abc", encoded[10..-1]
+  end
+end
+
+class ConnackPacketTest < MiniTest::Test
+  def test_decode_accepted_connection
+    packet = ConnackPacket.new
+    packet.decode "\x01\x00".to_stream
+    assert true, packet.session_present?
+    assert true, packet.accepted?
   end
 end

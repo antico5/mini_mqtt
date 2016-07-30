@@ -5,21 +5,15 @@ class InvalidFlagsError < StandardError ; end
 class Packet
   include BinHelper
 
-  attr_accessor :length
-
-  def decode stream, length
+  def decode stream
     @stream = stream
-    @length = length
     read_variable_header
     read_payload
     self
   end
 
   def encode
-    # Build variable header and payload, set length and return the encoded packet
-    bytes = build_variable_header + build_payload
-    self.length = bytes.length
-    bytes
+    build_variable_header + build_payload
   end
 
   def flags
@@ -44,6 +38,20 @@ class Packet
 end
 
 class ConnackPacket < Packet
+  attr_reader :return_code
+
+  def read_variable_header
+    @session_present = @stream.readbyte & 0x01
+    @return_code = @stream.readbyte
+  end
+
+  def session_present?
+    @session_present == 1
+  end
+
+  def accepted?
+    @return_code == 0
+  end
 end
 
 class PublishPacket < Packet

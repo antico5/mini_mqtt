@@ -14,6 +14,7 @@ PACKET_CLASSES = { 1 => ConnectPacket,
                    12 => PingreqPacket,
                    13 => PingrespPacket,
                    14 => DisconnectPacket }
+PACKET_CODES = PACKET_CLASSES.invert
 
 class PacketHandler
   MAX_LENGTH_MULTIPLIER = 128 ** 3
@@ -24,10 +25,20 @@ class PacketHandler
 
   def get_packet
     first_byte = @stream.readbyte
-    @packet_class = PACKET_CLASSES[ first_byte >> 4 ]
-    @flags = first_byte & 0xf
-    @length = decode_length @stream
-    @packet_class.new.decode @stream, @length
+    packet_class = PACKET_CLASSES[ first_byte >> 4 ]
+    flags = first_byte & 0xf
+    length = decode_length @stream
+    encoded_packet = @stream.read length
+    packet_class.new.decode StringIO.new(encoded_packet)
+  end
+
+  def write_packet packet
+    type_and_flags = PACKET_CODES[packet.class] << 4
+    type_and_flags =+ packet.flags
+    @stream.write uchar(type_and_flags)
+    encoded_packet = packet.encode
+    @stream.write encode_length(encoded_packet.length)
+    @stream.write encoded_packet
   end
 
   private
