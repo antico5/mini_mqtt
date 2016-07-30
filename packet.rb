@@ -1,6 +1,10 @@
+require 'bin_helper'
+
 class InvalidFlagsError < StandardError ; end
 
 class Packet
+  include BinHelper
+
   attr_accessor :length
 
   def decode stream, length
@@ -47,8 +51,9 @@ class ConnectPacket < Packet
     @will_message = options[:will_message]
     @will_topic = options[:will_topic]
     @will_retain = options[:will_retain]
-    @will_qos = options[:will_qos]
+    @will_qos = options[:will_qos] || 0
     @clean_session = options.fetch :clean_session, true
+    @keep_alive = options[:keep_alive] || 15
   end
 
   def build_variable_header
@@ -64,7 +69,7 @@ class ConnectPacket < Packet
     byte |= @will_qos << 3
     header << uchar(byte)
     #Keepalive
-    header << ushort(@keepalive)
+    header << ushort(@keep_alive)
     header
   end
 
