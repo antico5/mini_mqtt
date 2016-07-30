@@ -1,11 +1,29 @@
+PACKET_CLASSES = { 1 => :connect,
+                   2 => :connack,
+                   3 => :publish,
+                   4 => :puback,
+                   5 => :pubrec,
+                   6 => :pubrel,
+                   7 => :pubcomp,
+                   8 => :subscribe,
+                   9 => :suback,
+                   10 => :unsubscribe,
+                   11 => :unsuback,
+                   12 => :pingreq,
+                   13 => :pingresp,
+                   14 => :disconnect }
+
 class Packet
   MAX_LENGTH_MULTIPLIER = 128 ** 3
 
-  attr_reader :type, :flags
-  def initialize bytes
-    @bytes = bytes
-    @type = bytes[0] >> 4
-    @flags = bytes & 0xf
+  attr_reader :type, :flags, :length, :body
+
+  def initialize stream
+    first_byte = stream.readbyte
+    @type = PACKET_CLASSES[ first_byte >> 4 ]
+    @flags = first_byte & 0xf
+    @length = decode_length stream
+    @body = stream.read @length
   end
 
   private
@@ -34,4 +52,8 @@ class Packet
   end
 end
 
-class p1 = Packet.new ""
+stream = StringIO.new "\x13\x09holaperro"
+p1 = Packet.new stream
+
+
+
