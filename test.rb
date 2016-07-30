@@ -5,6 +5,12 @@ require 'packet_reader'
 require 'packet'
 
 
+class String
+  def to_stream
+    StringIO.new self
+  end
+end
+
 class TestPacketReader < Minitest::Test
   def setup
     @socket = StringIO.new
@@ -13,20 +19,29 @@ class TestPacketReader < Minitest::Test
     @socket.write connect_packet_bytes
     @socket.write unsubscribe_packet_bytes
     @socket.rewind
+    @reader = PacketReader.new @socket
   end
 
   def test_get_packet
-    reader = PacketReader.new @socket
-
-    packet = reader.get_packet
+    packet = @reader.get_packet
     assert_equal ConnectPacket, packet.class
     assert_equal 0b0000, packet.flags
     assert_equal "", packet.body
 
-    packet = reader.get_packet
+    packet = @reader.get_packet
     assert_equal UnsubscribePacket, packet.class
     assert_equal 0b0010, packet.flags
     assert_equal "topic", packet.body
   end
+
+  def test_length_decoding
+    assert_equal 321, @reader.send(:decode_length, "\xC1\x02".to_stream)
+    assert_equal 16384, @reader.send(:decode_length, "\x80\x80\x01".to_stream)
+    assert_equal 268_435_455, @reader.send(:decode_length, "\xFF\xFF\xFF\x7F".to_stream)
+    assert_raises StandardError do
+      @reader.send(:decode_length, "\xFF\xFF\xFF\xFF".to_stream)
+    end
+  end
+
 end
 
