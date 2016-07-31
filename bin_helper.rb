@@ -11,7 +11,7 @@ module BinHelper
     raise "flags must have 8 elements" unless flags.size == 8
     byte = 0
     flags.reverse.each_with_index do |flag, index|
-      byte |= 1 << index if flag
+      byte |= 1 << index if flag && flag != 0
     end
     byte
   end

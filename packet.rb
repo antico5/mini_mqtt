@@ -123,6 +123,19 @@ class PublishPacket < Packet
 end
 
 class PubackPacket < Packet
+  attr_accessor :packet_id
+
+  def initialize params = {}
+    @packet_id = params[:packet_id]
+  end
+
+  def read_variable_header
+    @packet_id = read_ushort @stream
+  end
+
+  def build_variable_header
+    ushort(@packet_id)
+  end
 end
 
 class PubrecPacket < Packet
