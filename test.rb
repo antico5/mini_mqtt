@@ -153,3 +153,41 @@ class PubackPacketTest < MiniTest::Test
     assert_equal puback.encode, "\x00\x09"
   end
 end
+
+class PubrecPacketTest < MiniTest::Test
+  def test_decode
+    pubrec = PubrecPacket.new.decode "\x00\xFF".to_stream
+    assert_equal pubrec.packet_id, 0xFF
+  end
+
+  def test_encode
+    pubrec = PubrecPacket.new packet_id: 9
+    assert_equal pubrec.encode, "\x00\x09"
+  end
+end
+
+class PubrelPacketTest < MiniTest::Test
+  def test_decode
+    pubrel = PubrelPacket.new.decode "\x00\xFF".to_stream
+    assert_equal pubrel.packet_id, 0xFF
+  end
+
+  def test_encode_and_flags
+    pubrel = PubrelPacket.new packet_id: 9
+    assert_equal pubrel.encode, "\x00\x09"
+    assert_equal 0b0010, pubrel.flags
+  end
+
+end
+
+class PubcompPacketTest < MiniTest::Test
+  def test_decode
+    pubcomp = PubcompPacket.new.decode "\x00\xFF".to_stream
+    assert_equal pubcomp.packet_id, 0xFF
+  end
+
+  def test_encode
+    pubcomp = PubcompPacket.new packet_id: 9
+    assert_equal pubcomp.encode, "\x00\x09"
+  end
+end

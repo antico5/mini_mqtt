@@ -138,13 +138,16 @@ class PubackPacket < Packet
   end
 end
 
-class PubrecPacket < Packet
+class PubrecPacket < PubackPacket
 end
 
-class PubrelPacket < Packet
+class PubrelPacket < PubackPacket
+  def flags
+    0b0010
+  end
 end
 
-class PubcompPacket < Packet
+class PubcompPacket < PubackPacket
 end
 
 class SubscribePacket < Packet
