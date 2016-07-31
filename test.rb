@@ -101,30 +101,39 @@ end
 
 class PublishPacketTest < MiniTest::Test
   def setup
-    @packet1 = PublishPacket.new.decode "\x00\x03a/b\x00\x0aMessageHere".to_stream, 0b1011
-    @packet2 = PublishPacket.new.decode "\x00\x03a/bMessageHere".to_stream, 0b0000
+    @inbound_publish_1 = PublishPacket.new.decode "\x00\x03a/b\x00\x0aMessageHere".to_stream, 0b1011
+    @inbound_publish_2 = PublishPacket.new.decode "\x00\x03a/bMessageHere".to_stream, 0b0000
+    @outbound_publish_1 = PublishPacket.new topic: 'help', message: 'SOS'
   end
 
   def test_read_flags
-    assert @packet1.dup
-    assert @packet1.retain
-    assert_equal 1, @packet1.qos
+    assert @inbound_publish_1.dup
+    assert @inbound_publish_1.retain
+    assert_equal 1, @inbound_publish_1.qos
 
-    refute @packet2.dup
-    refute @packet2.retain
-    assert_equal 0, @packet2.qos
+    refute @inbound_publish_2.dup
+    refute @inbound_publish_2.retain
+    assert_equal 0, @inbound_publish_2.qos
   end
 
   def test_decode_topic_and_packet_id
-    assert_equal 'a/b', @packet1.topic_name
-    assert_equal 10, @packet1.packet_id
+    assert_equal 'a/b', @inbound_publish_1.topic
+    assert_equal 10, @inbound_publish_1.packet_id
 
-    assert_equal 'a/b', @packet2.topic_name
-    assert_equal nil, @packet2.packet_id
+    assert_equal 'a/b', @inbound_publish_2.topic
+    assert_equal nil, @inbound_publish_2.packet_id
   end
 
   def test_decode_message
-    assert_equal 'MessageHere', @packet1.message
-    assert_equal 'MessageHere', @packet2.message
+    assert_equal 'MessageHere', @inbound_publish_1.message
+    assert_equal 'MessageHere', @inbound_publish_2.message
+  end
+
+  def test_encode_flags
+    assert_equal 0b0000, @outbound_publish_1.flags
+  end
+
+  def test_encode_message
+    assert_equal "\x00\x04helpSOS", @outbound_publish_1.encode
   end
 end

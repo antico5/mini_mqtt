@@ -14,9 +14,8 @@ class ConnectPacket < Packet
   end
 
   def build_variable_header
-    header = ""
     # Protocol name
-    header << ushort(4) # length of name
+    header = ushort(4) # length of name
     header << 'MQTT' # name
     # Protocol level
     header << uchar(4)
