@@ -98,3 +98,12 @@ class ConnackPacketTest < MiniTest::Test
     assert_match /bad username or password/, packet.error_message
   end
 end
+
+class PublishPacketTest < MiniTest::Test
+  def test_read_flags
+    packet = PublishPacket.new.decode("".to_stream, 0b1011)
+    assert packet.dup
+    assert packet.retain
+    assert_equal 1, packet.qos
+  end
+end

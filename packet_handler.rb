@@ -31,7 +31,7 @@ class PacketHandler
     flags = first_byte & 0xf
     length = decode_length @stream
     encoded_packet = @stream.read length
-    packet_class.new.decode StringIO.new(encoded_packet)
+    packet_class.new.decode StringIO.new(encoded_packet), flags
   end
 
   def write_packet packet

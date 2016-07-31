@@ -5,8 +5,11 @@ class InvalidFlagsError < StandardError ; end
 class Packet
   include BinHelper
 
-  def decode stream
+  attr_reader :flags
+
+  def decode stream, flags = 0
     @stream = stream
+    handle_flags flags
     read_variable_header
     read_payload
     self
@@ -17,7 +20,7 @@ class Packet
   end
 
   def flags
-    0b0000
+    0b000
   end
 
   private
@@ -28,6 +31,9 @@ class Packet
     def read_payload
     end
 
+    def handle_flags flags
+    end
+
     def build_variable_header
       ""
     end
@@ -35,6 +41,7 @@ class Packet
     def build_payload
       ""
     end
+
 end
 
 class ConnackPacket < Packet
@@ -67,6 +74,12 @@ class ConnackPacket < Packet
 end
 
 class PublishPacket < Packet
+  attr_accessor :dup, :qos, :retain
+  def handle_flags flags
+    @dup = flags & 0b1000 != 0
+    @qos = (flags & 0b0110) >> 1
+    @retain = flags & 0b0001 != 0
+  end
 end
 
 class PubackPacket < Packet
