@@ -173,12 +173,9 @@ class SubscribePacket < Packet
   end
 
   def build_payload
-    payload = ""
-    @topics.each do |topic, qos|
-      payload << mqtt_utf8_encode(topic)
-      payload << uchar(qos)
-    end
-    payload
+    @topics.map do |topic, qos|
+      mqtt_utf8_encode(topic) + uchar(qos)
+    end.join
   end
 end
 
