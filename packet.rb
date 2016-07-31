@@ -5,7 +5,7 @@ class InvalidFlagsError < StandardError ; end
 class Packet
   include BinHelper
 
-  attr_reader :flags
+  @@last_packet_id = 0
 
   def decode stream, flags = 0
     @stream = stream
@@ -24,6 +24,12 @@ class Packet
   end
 
   private
+
+    def new_packet_id
+      @@last_packet_id += 1
+      @@last_packet_id %= 65535
+      1 + @@last_packet_id
+    end
 
     def read_variable_header
     end
@@ -134,7 +140,7 @@ class PubackPacket < Packet
   end
 
   def build_variable_header
-    ushort(@packet_id)
+    ushort @packet_id
   end
 end
 
@@ -151,6 +157,29 @@ class PubcompPacket < PubackPacket
 end
 
 class SubscribePacket < Packet
+  attr_accessor :packet_id, :topics
+
+  def initialize params = {}
+    @topics = params[:topics]
+  end
+
+  def flags
+    0b0010
+  end
+
+  def build_variable_header
+    @packet_id ||= new_packet_id
+    ushort @packet_id
+  end
+
+  def build_payload
+    payload = ""
+    @topics.each do |topic, qos|
+      payload << mqtt_utf8_encode(topic)
+      payload << uchar(qos)
+    end
+    payload
+  end
 end
 
 class SubackPacket < Packet
