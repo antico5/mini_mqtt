@@ -74,12 +74,21 @@ class ConnackPacket < Packet
 end
 
 class PublishPacket < Packet
-  attr_accessor :dup, :qos, :retain
+  attr_accessor :dup, :qos, :retain, :packet_id, :topic_name
+
   def handle_flags flags
     @dup = flags & 0b1000 != 0
     @qos = (flags & 0b0110) >> 1
     @retain = flags & 0b0001 != 0
   end
+
+  def read_variable_header
+    @topic_name = read_mqtt_encoded_string @stream
+    if qos > 0
+      @packet_id = read_ushort @stream
+    end
+  end
+
 end
 
 class PubackPacket < Packet

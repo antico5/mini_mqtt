@@ -100,10 +100,18 @@ class ConnackPacketTest < MiniTest::Test
 end
 
 class PublishPacketTest < MiniTest::Test
+  def setup
+    @packet = PublishPacket.new.decode "\x00\x03a/b\x00\x0a".to_stream, 0b1011
+  end
+
   def test_read_flags
-    packet = PublishPacket.new.decode("".to_stream, 0b1011)
-    assert packet.dup
-    assert packet.retain
-    assert_equal 1, packet.qos
+    assert @packet.dup
+    assert @packet.retain
+    assert_equal 1, @packet.qos
+  end
+
+  def test_decode_topic_and_packet_id
+    assert_equal 'a/b', @packet.topic_name
+    assert_equal 10, @packet.packet_id
   end
 end

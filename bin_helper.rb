@@ -20,4 +20,13 @@ module BinHelper
     ushort(string.length) + string
   end
 
+  def read_mqtt_encoded_string stream
+    length = read_ushort stream
+    stream.read length
+  end
+
+  def read_ushort stream
+    stream.read(2).unpack('n').first
+  end
+
 end
