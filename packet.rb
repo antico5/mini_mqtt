@@ -74,7 +74,7 @@ class ConnackPacket < Packet
 end
 
 class PublishPacket < Packet
-  attr_accessor :dup, :qos, :retain, :packet_id, :topic_name
+  attr_accessor :dup, :qos, :retain, :packet_id, :topic_name, :message
 
   def handle_flags flags
     @dup = flags & 0b1000 != 0
@@ -89,6 +89,9 @@ class PublishPacket < Packet
     end
   end
 
+  def read_payload
+    @message = @stream.read
+  end
 end
 
 class PubackPacket < Packet

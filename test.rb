@@ -101,17 +101,30 @@ end
 
 class PublishPacketTest < MiniTest::Test
   def setup
-    @packet = PublishPacket.new.decode "\x00\x03a/b\x00\x0a".to_stream, 0b1011
+    @packet1 = PublishPacket.new.decode "\x00\x03a/b\x00\x0aMessageHere".to_stream, 0b1011
+    @packet2 = PublishPacket.new.decode "\x00\x03a/bMessageHere".to_stream, 0b0000
   end
 
   def test_read_flags
-    assert @packet.dup
-    assert @packet.retain
-    assert_equal 1, @packet.qos
+    assert @packet1.dup
+    assert @packet1.retain
+    assert_equal 1, @packet1.qos
+
+    refute @packet2.dup
+    refute @packet2.retain
+    assert_equal 0, @packet2.qos
   end
 
   def test_decode_topic_and_packet_id
-    assert_equal 'a/b', @packet.topic_name
-    assert_equal 10, @packet.packet_id
+    assert_equal 'a/b', @packet1.topic_name
+    assert_equal 10, @packet1.packet_id
+
+    assert_equal 'a/b', @packet2.topic_name
+    assert_equal nil, @packet2.packet_id
+  end
+
+  def test_decode_message
+    assert_equal 'MessageHere', @packet1.message
+    assert_equal 'MessageHere', @packet2.message
   end
 end
