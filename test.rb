@@ -104,6 +104,8 @@ class PublishPacketTest < MiniTest::Test
     @inbound_publish_1 = PublishPacket.new.decode "\x00\x03a/b\x00\x0aMessageHere".to_stream, 0b1011
     @inbound_publish_2 = PublishPacket.new.decode "\x00\x03a/bMessageHere".to_stream, 0b0000
     @outbound_publish_1 = PublishPacket.new topic: 'help', message: 'SOS'
+    @outbound_publish_2 = PublishPacket.new topic: 'help', message: 'SOS',
+      qos: 1, dup: true, retain: true, packet_id: 5
   end
 
   def test_read_flags
@@ -131,9 +133,11 @@ class PublishPacketTest < MiniTest::Test
 
   def test_encode_flags
     assert_equal 0b0000, @outbound_publish_1.flags
+    assert_equal 0b1011, @outbound_publish_2.flags
   end
 
   def test_encode_message
     assert_equal "\x00\x04helpSOS", @outbound_publish_1.encode
+    assert_equal "\x00\x04help\x00\x05SOS", @outbound_publish_2.encode
   end
 end
