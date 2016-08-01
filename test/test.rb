@@ -1,14 +1,16 @@
-$:.unshift File.dirname __FILE__
+$:.unshift File.join( __FILE__, "..", "..", "lib")
 require 'minitest/autorun'
 require 'pry'
-require 'packet_handler'
-require 'packet'
-
+require 'mini_mqtt'
 
 class String
   def to_stream
     StringIO.new self
   end
+end
+
+class MiniTest::Test
+  include MiniMqtt
 end
 
 class TestPacketHandler < Minitest::Test
