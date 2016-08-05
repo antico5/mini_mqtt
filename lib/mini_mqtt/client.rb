@@ -24,8 +24,9 @@ module MiniMqtt
       @packet_handler.write_packet ConnectPacket.new user: @user,
         password: @password
 
-      # Give control to caller
-      yield
+      # Create new session and yield to caller
+      session = Session.new @packet_handler
+      yield session
 
       # Send DisconnectPacket and kill read thread.
       @packet_handler.write_packet DisconnectPacket.new
