@@ -179,6 +179,15 @@ module MiniMqtt
   end
 
   class SubackPacket < Packet
+    attr_accessor :packet_id, :max_qos_accepted
+
+    def read_variable_header
+      @packet_id = read_ushort @stream
+    end
+
+    def read_payload
+      @max_qos_accepted = @stream.read.unpack 'C*'
+    end
   end
 
   class UnsubscribePacket < Packet
