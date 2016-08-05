@@ -117,7 +117,10 @@ module MiniMqtt
 
     def build_variable_header
       header = mqtt_utf8_encode @topic
-      header << ushort(@packet_id) if @qos > 0
+      if @qos > 0
+        @packet_id ||= new_packet_id
+        header << ushort(@packet_id) if @qos > 0
+      end
       header
     end
 
