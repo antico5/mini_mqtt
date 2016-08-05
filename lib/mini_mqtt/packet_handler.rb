@@ -20,16 +20,25 @@ module MiniMqtt
 
     MAX_LENGTH_MULTIPLIER = 128 ** 3
 
+    attr_accessor :debug
+
     def initialize stream
       @stream = stream
     end
 
     def get_packet
+      # First byte contains packet type and flags. 4 bits each.
       first_byte = @stream.readbyte
       packet_class = PACKET_CLASSES[ first_byte >> 4 ]
       flags = first_byte & 0xf
+
+      #Decode length using algorithm, and read packet body.
       length = decode_length @stream
+      log 'IN', "Length: #{length}"
       encoded_packet = @stream.read length
+      log 'IN', encoded_packet
+
+      # Create appropiate packet instance and decode the packet body.
       packet_class.new.decode StringIO.new(encoded_packet), flags
     end
 
@@ -38,6 +47,7 @@ module MiniMqtt
       type_and_flags += packet.flags
       @stream.write uchar(type_and_flags)
       encoded_packet = packet.encode
+      log 'OUT', encoded_packet
       @stream.write encode_length(encoded_packet.length)
       @stream.write encoded_packet
     end
@@ -46,11 +56,12 @@ module MiniMqtt
 
     def encode_length length
       encoded = ""
-      while length > 0
+      loop do
         encoded_byte = length % 128
         length = length / 128
         encoded_byte |= 128 if length > 0
         encoded << encoded_byte.chr
+        break if length == 0
       end
       encoded
     end
@@ -65,6 +76,12 @@ module MiniMqtt
         raise "Malformed remaining length" if multiplier > MAX_LENGTH_MULTIPLIER
       end
       length
+    end
+
+    def log flow, message
+      if @debug
+        puts "\n#{ flow } - #{ message.inspect }\n"
+      end
     end
   end
 end
