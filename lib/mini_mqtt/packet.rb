@@ -213,7 +213,7 @@ module MiniMqtt
     end
   end
 
-  class UnsubackPacket < Packet
+  class UnsubackPacket < PubackPacket
   end
 
   class PingreqPacket < Packet
