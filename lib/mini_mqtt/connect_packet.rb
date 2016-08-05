@@ -3,13 +3,13 @@ module MiniMqtt
     def initialize options = {}
       @user = options[:user]
       @password = options[:password]
-      @client_id = options[:client_id] || rand(1000000).to_s
+      @client_id = options[:client_id]
       @will_message = options[:will_message]
       @will_topic = options[:will_topic]
       @will_retain = options[:will_retain]
       @will_qos = options[:will_qos] || 0
-      @clean_session = options.fetch :clean_session, true
-      @keep_alive = options[:keep_alive] || 15
+      @clean_session = options[:clean_session]
+      @keep_alive = options[:keep_alive]
     end
 
     def build_variable_header

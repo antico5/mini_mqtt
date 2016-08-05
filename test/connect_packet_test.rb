@@ -22,14 +22,4 @@ class ConnectPacketTest < MiniTest::Test
     assert_equal "\x00\x05arman", encoded[37..43]
     assert_equal "\x00\x06secret", encoded[44..-1]
   end
-
-  def test_encode_without_params
-    packet = ConnectPacket.new client_id: 'abc'
-    encoded = packet.encode
-    assert_equal "\x00\x04MQTT", encoded[0..5]
-    assert_equal "\x04", encoded[6]
-    assert_equal [0x02], encoded[7].bytes
-    assert_equal "\x00\x0F", encoded[8..9]
-    assert_equal "\x00\x03abc", encoded[10..-1]
-  end
 end

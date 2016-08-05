@@ -7,11 +7,11 @@ class TestPacketHandler < Minitest::Test
   end
 
   def test_get_packet
-    @socket.write "\x10\x00"
+    @socket.write "\xd0\x00"
     @socket.write "\xa2\x05topic"
     @socket.rewind
     packet = @handler.get_packet
-    assert_equal ConnectPacket, packet.class
+    assert_equal PingrespPacket, packet.class
 
     packet = @handler.get_packet
     assert_equal UnsubscribePacket, packet.class
@@ -26,7 +26,7 @@ class TestPacketHandler < Minitest::Test
   end
 
   def test_write_connect_packet
-    packet = ConnectPacket.new client_id: 'abc'
+    packet = ConnectPacket.new client_id: 'abc', keep_alive: 15
     @handler.write_packet packet
     @socket.rewind
     assert_equal 0x10, @socket.readbyte # packet type and flags
