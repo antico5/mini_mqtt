@@ -2,13 +2,16 @@ require 'socket'
 
 module MiniMqtt
   class Client
-    attr_accessor :host, :port, :user, :password
+    attr_accessor :host, :port, :user, :password, :clean_session
 
     def initialize params = {}
       @host = params[:host]
       @port = params[:port]
       @user = params[:user]
       @password = params[:password]
+      @keep_alive = params[:keep_alive] || 15
+      @client_id = params[:client_id] || generate_client_id
+      @clean_session = params.fetch :clean_session, true
     end
 
     def connect
@@ -17,38 +20,23 @@ module MiniMqtt
       @packet_handler = PacketHandler.new @socket
       @packet_handler.debug = true
 
-      #Spawn read thread to receive incoming packets
-      spawn_read_thread!
-
       # Send ConnectPacket
       @packet_handler.write_packet ConnectPacket.new user: @user,
-        password: @password
+        password: @password, keep_alive: @keep_alive, client_id: @client_id,
+        clean_session: @clean_session
 
-      # Create new session and yield to caller
-      session = Session.new @packet_handler
-      yield session
+      # Receive connack packet
+      connack = @packet_handler.get_packet
 
-      # Send DisconnectPacket and kill read thread.
-      @packet_handler.write_packet DisconnectPacket.new
-      kill_read_thread!
+      if connack.accepted?
+        Session.new @packet_handler
+      else
+        raise StandardError.new(connack.error)
+      end
     end
 
-    private
-
-      def spawn_read_thread!
-        @read_thread = Thread.new do
-          begin
-            loop do
-              @packet_handler.get_packet
-            end
-          rescue Exception => e
-            puts e.inspect
-          end
-        end
-      end
-
-      def kill_read_thread!
-        @read_thread.kill
+      def generate_client_id
+        "id_#{ rand(10000).to_s }"
       end
   end
 end
