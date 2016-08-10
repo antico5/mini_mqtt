@@ -119,7 +119,7 @@ module MiniMqtt
       header = mqtt_utf8_encode @topic
       if @qos > 0
         @packet_id ||= new_packet_id
-        header << ushort(@packet_id) if @qos > 0
+        header << ushort(@packet_id)
       end
       header
     end
