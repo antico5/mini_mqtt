@@ -29,7 +29,7 @@ module MiniMqtt
       connack = @packet_handler.get_packet
 
       if connack.accepted?
-        @received_messages = []
+        @received_messages = Queue.new
         @last_ping_response = Time.now
         spawn_read_thread!
         spawn_keepalive_thread!
@@ -55,12 +55,19 @@ module MiniMqtt
       @socket.close
     end
 
+    def get_message
+      message = @received_messages.pop
+      yield message.message, message.topic
+    end
+
     private
 
       def handle_received_packet packet
         case packet
         when PingrespPacket
           @last_ping_response = Time.now
+        when PublishPacket
+          @received_messages << packet
         end
       end
 
@@ -84,7 +91,7 @@ module MiniMqtt
       def spawn_keepalive_thread!
         @keepalive_thread = Thread.new do
           loop do
-            @handler.write_packet PingreqPacket.new
+            @packet_handler.write_packet PingreqPacket.new
             sleep @keep_alive
             if Time.now - @last_ping_response > @keep_alive
               puts "SERVER NOT RESPONDING TO PING."
