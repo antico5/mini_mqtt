@@ -24,6 +24,7 @@ module MiniMqtt
 
     def initialize stream
       @stream = stream
+      @mutex = Mutex.new
     end
 
     def get_packet
@@ -42,13 +43,15 @@ module MiniMqtt
     end
 
     def write_packet packet
-      type_and_flags = PACKET_CODES[packet.class] << 4
-      type_and_flags += packet.flags
-      @stream.write uchar(type_and_flags)
-      encoded_packet = packet.encode
-      log 'OUT', packet.class, encoded_packet
-      @stream.write encode_length(encoded_packet.length)
-      @stream.write encoded_packet
+      @mutex.synchronize do
+        type_and_flags = PACKET_CODES[packet.class] << 4
+        type_and_flags += packet.flags
+        @stream.write uchar(type_and_flags)
+        encoded_packet = packet.encode
+        log 'OUT', packet.class, encoded_packet
+        @stream.write encode_length(encoded_packet.length)
+        @stream.write encoded_packet
+      end
     end
 
     private
