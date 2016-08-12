@@ -42,8 +42,9 @@ module MiniMqtt
       send_packet packet
     end
 
-    def publish topic, message
-      packet = PublishPacket.new topic: topic, message: message
+    def publish topic, message, options = {}
+      packet = PublishPacket.new topic: topic, message: message.to_s,
+        retain: options[:retain]
       send_packet packet
     end
 
