@@ -37,8 +37,14 @@ module MiniMqtt
       end
     end
 
-    def subscribe topic
-      packet = SubscribePacket.new topics: {topic => 0}
+    def subscribe *params
+      # Each param can be a topic or a topic with its max qos.
+      # Example: subscribe 'topic1', 'topic2' => 1
+      topics = params.map do |arg|
+        arg.is_a?(Hash) ? arg : { arg => 0 }
+      end
+      topics = topics.inject &:merge
+      packet = SubscribePacket.new topics: topics
       send_packet packet
     end
 
