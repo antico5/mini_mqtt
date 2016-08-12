@@ -3,14 +3,17 @@ require 'socket'
 
 class ClientTest < MiniTest::Test
   def setup
-    @client = Client.new host: 'localhost', port: 1883, keep_alive: 5,
-      client_id: 'myclient'
+    @client = Client.new host: 'localhost', port: 1883, keep_alive: 5
   end
 
   def test_mosquitto_server_is_running
-    socket = TCPSocket.new 'localhost', 1883
-    assert !socket.closed?
-    socket.close
+    begin
+      socket = TCPSocket.new 'localhost', 1883
+      socket.close
+    rescue
+      puts "You should have mosquitto server running to run integration
+      tests. Try sudo apt-get install mosquitto."
+    end
   end
 
   def test_connect_and_disconnect
@@ -29,6 +32,18 @@ class ClientTest < MiniTest::Test
       assert_equal 'hi', msg
     end
     @client.disconnect
+  end
+
+  def test_subscribe_multiple_topics
+    @client.connect
+    @client.subscribe '/test1', '/test2'
+    @client.publish '/test1', 'message_1'
+    @client.publish '/test2', 'message_2'
+    received = []
+    2.times do
+      @client.get_message { |msg| received << msg }
+    end
+    assert_equal ['message_1', 'message_2'], received
   end
 
   def test_retain_message
