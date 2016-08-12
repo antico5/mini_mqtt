@@ -20,7 +20,11 @@ module MiniMqtt
 
     MAX_LENGTH_MULTIPLIER = 128 ** 3
 
-    attr_accessor :debug
+    @@debug = false
+
+    def self.enable_debug
+      @@debug = true
+    end
 
     def initialize stream
       @stream = stream
@@ -43,6 +47,7 @@ module MiniMqtt
     end
 
     def write_packet packet
+      # Write type and flags, then encoded packet length, then packet
       @mutex.synchronize do
         type_and_flags = PACKET_CODES[packet.class] << 4
         type_and_flags += packet.flags
@@ -81,7 +86,7 @@ module MiniMqtt
     end
 
     def log flow, type, message
-      if @debug
+      if @@debug
         puts "\n#{ flow } - #{ type.to_s } - #{ message.inspect }\n"
       end
     end

@@ -18,7 +18,6 @@ module MiniMqtt
       # Create socket and packet handler
       @socket = TCPSocket.new @host, @port
       @packet_handler = PacketHandler.new @socket
-      @packet_handler.debug = true
 
       # Send ConnectPacket
       send_packet ConnectPacket.new user: @user,
@@ -68,7 +67,7 @@ module MiniMqtt
       def send_packet packet
         begin
           @packet_handler.write_packet packet
-        rescue Exception => e
+        rescue StandardError => e
           puts "Exception while sending packet: #{ e.inspect }"
           close_connection
         end
@@ -77,7 +76,7 @@ module MiniMqtt
       def receive_packet
         begin
           @packet_handler.get_packet
-        rescue Exception => e
+        rescue StandardError => e
           puts "Exception while receiving: #{ e.inspect }"
           close_connection
         end
@@ -119,9 +118,9 @@ module MiniMqtt
       end
 
       def close_connection
-        @socket.close
         @read_thread.kill
         @keepalive_thread.kill
+        @socket.close
       end
   end
 end
