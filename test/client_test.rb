@@ -4,7 +4,7 @@ require 'socket'
 class ClientTest < MiniTest::Test
   def setup
     @client = Client.new host: 'localhost', port: 1883, keep_alive: 5,
-      client_id: 'myclient', clean_session: false
+      client_id: 'myclient'
   end
 
   def test_mosquitto_server_is_running
@@ -27,6 +27,30 @@ class ClientTest < MiniTest::Test
     @client.get_message do |msg, topic|
       assert_equal '/test', topic
       assert_equal 'hi', msg
+    end
+    @client.disconnect
+  end
+
+  def test_retain_message
+    @client.connect
+    message_to_retain = rand.to_s
+    @client.publish '/retain', message_to_retain, retain: true
+    @client.subscribe '/retain'
+    @client.get_message do |msg|
+      assert_equal message_to_retain, msg
+    end
+    @client.disconnect
+  end
+
+  def test_clean_session
+    @client.clean_session = false
+    @client.connect
+    @client.subscribe '/test'
+    @client.disconnect
+    @client.connect
+    @client.publish '/test', 'hello'
+    @client.get_message do |msg|
+      assert_equal 'hello', msg
     end
     @client.disconnect
   end
