@@ -60,6 +60,10 @@ module MiniMqtt
       yield message.message, message.topic
     end
 
+    def connected?
+      @socket && !@socket.closed?
+    end
+
     private
 
       def handle_received_packet packet
