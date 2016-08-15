@@ -57,7 +57,9 @@ module MiniMqtt
     def disconnect
       # Send DisconnectPacket, then kill threads and close socket
       send_packet DisconnectPacket.new
-      close_connection
+      @read_thread.kill
+      @keepalive_thread.kill
+      @socket.close
     end
 
     def get_message
@@ -76,7 +78,7 @@ module MiniMqtt
           @packet_handler.write_packet packet
         rescue StandardError => e
           puts "Exception while sending packet: #{ e.inspect }"
-          close_connection
+          @socket.close
         end
       end
 
@@ -85,7 +87,7 @@ module MiniMqtt
           @packet_handler.get_packet
         rescue StandardError => e
           puts "Exception while receiving: #{ e.inspect }"
-          close_connection
+          @socket.close
         end
       end
 
@@ -104,8 +106,7 @@ module MiniMqtt
 
       def spawn_read_thread!
         @read_thread = Thread.new do
-          loop do
-            # read packet from socket and handle it
+          while connected? do
             handle_received_packet receive_packet
           end
         end
@@ -113,21 +114,15 @@ module MiniMqtt
 
       def spawn_keepalive_thread!
         @keepalive_thread = Thread.new do
-          loop do
+          while connected? do
             send_packet PingreqPacket.new
             sleep @keep_alive
             if Time.now - @last_ping_response > @keep_alive
               puts "Error: Server not responding to ping. Disconnecting."
-              close_connection
+              @socket.close
             end
           end
         end
-      end
-
-      def close_connection
-        @read_thread.kill
-        @keepalive_thread.kill
-        @socket.close
       end
   end
 end
