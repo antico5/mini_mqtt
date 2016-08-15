@@ -3,7 +3,7 @@ require 'socket'
 
 class ClientTest < MiniTest::Test
   def setup
-    @client = Client.new host: 'localhost', port: 1883, keep_alive: 5
+    @client = Client.new host: 'localhost'
   end
 
   def test_mosquitto_server_is_running
@@ -68,6 +68,20 @@ class ClientTest < MiniTest::Test
       assert_equal 'hello', msg
     end
     @client.disconnect
+  end
+
+  def test_last_will
+    @client2 = MiniMqtt::Client.new host: 'localhost'
+    @client2.connect
+    @client2.subscribe 'last_will'
+    sleep 1 # wait for suback to come back
+    @client.connect will_topic: 'last_will', will_message: 'help!!'
+    # abruptly close connection by closing socket.
+    @client.instance_variable_get(:@socket).close
+    @client2.get_message do |msg|
+      assert_equal 'help!!', msg
+    end
+    @client2.disconnect
   end
 end
 
