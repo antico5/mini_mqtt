@@ -14,7 +14,7 @@ module MiniMqtt
       @clean_session = params.fetch :clean_session, true
     end
 
-    def connect
+    def connect options = {}
       # Create socket and packet handler
       @socket = TCPSocket.new @host, @port
       @packet_handler = PacketHandler.new @socket
@@ -22,7 +22,8 @@ module MiniMqtt
       # Send ConnectPacket
       send_packet ConnectPacket.new user: @user,
         password: @password, keep_alive: @keep_alive, client_id: @client_id,
-        clean_session: @clean_session
+        clean_session: @clean_session, will_topic: options[:will_topic],
+        will_message: options[:will_message], will_retain: options[:will_retain]
 
       # Receive connack packet
       connack = receive_packet
