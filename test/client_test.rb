@@ -58,7 +58,7 @@ class ClientTest < MiniTest::Test
   end
 
   def test_clean_session
-    @client.clean_session = false
+    @client = MiniMqtt::Client.new host: 'localhost', clean_session: false
     @client.connect
     @client.subscribe '/test'
     @client.disconnect
@@ -82,6 +82,20 @@ class ClientTest < MiniTest::Test
       assert_equal 'help!!', msg
     end
     @client2.disconnect
+  end
+
+  def test_last_will_with_retain
+    will_msg = rand.to_s
+    @client.connect will_topic: 'last_will_retain', will_message: will_msg,
+      will_retain: true
+    assert @client.connected?
+    @client.instance_variable_get(:@socket).close
+    @client.connect
+    @client.subscribe 'last_will_retain'
+    @client.get_message do |msg|
+      assert_equal msg, will_msg
+    end
+    @client.disconnect
   end
 end
 
