@@ -10,6 +10,10 @@ Project is currently under development.
 
 Clone this repo and include it to your load path. This project isn't published at rubygems yet.
 
+## How to test
+
+  rake test
+
 ## Usage
 
 ```ruby
@@ -17,7 +21,7 @@ require 'mini_mqtt'
 
 
 # Create client instance
-# Possible params are host, port, user, password, keep_alive, client_id, and clean_session
+# Possible params are host, port, user, password, keep_alive (seconds), client_id, and clean_session
 # client_id defaults to random client id
 # clean_session defaults to true
 # keep_alive defaults to 10
@@ -27,7 +31,7 @@ client = MiniMqtt::Client.new host: 'localhost'
 # Establish connection
 client.connect
 
-# Check if client is connected
+# Check at any time if client is connected
 puts client.connected?
 
 # Publish messages
