@@ -71,6 +71,12 @@ module MiniMqtt
       @received_messages.pop
     end
 
+    def get_messages &b
+      while message = get_message
+        yield message.message, message.topic
+      end
+    end
+
     def connected?
       @socket && !@socket.closed?
     end

@@ -41,8 +41,8 @@ class ClientTest < MiniTest::Test
     @client.publish '/test2', 'message_2'
     expected = ['message_1', 'message_2']
     @client.get_messages do |message, topic|
-      break if expected.empty?
       assert_equal expected.shift, message
+      break if expected.empty?
     end
     @client.disconnect
   end
