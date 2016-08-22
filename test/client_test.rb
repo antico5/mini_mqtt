@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'socket'
+require 'timeout'
 
 class ClientTest < MiniTest::Test
   def setup
@@ -44,6 +45,20 @@ class ClientTest < MiniTest::Test
       @client.get_message { |msg| received << msg }
     end
     assert_equal ['message_1', 'message_2'], received
+  end
+
+  def test_unsubscribe
+    @client.connect
+    @client.subscribe '/test'
+    @client.unsubscribe '/test'
+    @client.publish '/test', 'hi'
+    assert_raises(Timeout::Error) do
+      Timeout::timeout(1) do
+        @client.get_message do |msg, topic|
+        end
+      end
+    end
+    @client.disconnect
   end
 
   def test_retain_message
