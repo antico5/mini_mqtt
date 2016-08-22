@@ -40,7 +40,7 @@ module MiniMqtt
       #Decode length using algorithm, and read packet body.
       length = decode_length @stream
       encoded_packet = @stream.read length
-      log_packet 'IN', packet_class, encoded_packet
+      log_in_packet packet_class, encoded_packet
 
       # Create appropiate packet instance and decode the packet body.
       packet_class.new.decode StringIO.new(encoded_packet), flags
@@ -57,7 +57,7 @@ module MiniMqtt
         type_and_flags += packet.flags
         @stream.write uchar(type_and_flags)
         encoded_packet = packet.encode
-        log_packet 'OUT', packet.class, encoded_packet
+        log_out_packet packet
         @stream.write encode_length(encoded_packet.length)
         @stream.write encoded_packet
       end
@@ -92,8 +92,12 @@ module MiniMqtt
       length
     end
 
-    def log_packet flow, type, message
-      log "\n#{ flow } - #{ type.to_s } - #{ message.inspect }\n"
+    def log_in_packet type, message
+      log "\nIN - #{ type.to_s } - #{ message.inspect }\n"
+    end
+
+    def log_out_packet packet
+      log "\nOUT - #{ packet.class.to_s } - #{ packet.instance_variable_get :@packet_id } - #{ packet.encode.inspect }\n"
     end
 
     def log text

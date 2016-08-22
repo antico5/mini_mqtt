@@ -5,7 +5,7 @@ module MiniMqtt
     attr_accessor :host, :port, :user, :password, :clean_session, :client_id
 
     def initialize params = {}
-      @host = params[:host] || localhost
+      @host = params[:host] || 'localhost'
       @port = params[:port] || 1883
       @user = params[:user]
       @password = params[:password]
@@ -55,7 +55,7 @@ module MiniMqtt
 
     def publish topic, message, options = {}
       packet = PublishPacket.new topic: topic, message: message.to_s,
-        retain: options[:retain]
+        retain: options[:retain], qos: options[:qos]
       send_packet packet
     end
 
@@ -95,8 +95,14 @@ module MiniMqtt
         case packet
         when PingrespPacket
           @last_ping_response = Time.now
+
         when PublishPacket
           @received_messages << packet
+          if packet.qos > 0
+            send_packet PubackPacket.new packet_id: packet.packet_id
+          end
+
+        when PubackPacket
         end
       end
 
