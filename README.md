@@ -12,12 +12,18 @@ The philosophy behind this gem is to keep the code as minimal and tidy as possib
     Ruby                 6            103             14            449
     ---------------------------------------------------------------------
 
+## Features
+
+* Supports all MQTT features up to QoS 1.
+* Doesn't support websockets.
+* Doesn't store messages once the connection has been closed.
+
 ## Installation
 
 Clone this repo and include it to your load path. This project isn't published at rubygems yet.
 
 ## How to test
-You need mosquitto server installed in order tu run integration tests.
+You need mosquitto server installed in order to run integration tests.
 
     sudo apt-get install mosquitto
     
@@ -42,11 +48,15 @@ client = MiniMqtt::Client.new host: 'test.mosquitto.org'
 ### Establish connection
 Options are will_topic, will_message, will_retain(false) and will_qos(0)
 
+```ruby
 client.connect
+```
 
 You can check at any time if client is connected
 
+```ruby
 puts client.connected?
+```
 
 ### Publish messages
 
@@ -61,7 +71,7 @@ client.publish '/other_topic', 'retained_message', retain: true
 client.publish '/qos_topic', 'message', qos: 1
 ```
 
-# Subscribe to topics
+### Subscribe to topics
 
 ```ruby
 # Single topic
@@ -74,7 +84,7 @@ client.subscribe '/topic', '/other_topic'
 client.subscribe '/topic', '/qos_topic' => 1
 ```
 
-# Get messages
+### Get messages
 The caller of these methods are blocked until a message arrives, or the connection is lost.
 
 ```ruby
@@ -88,6 +98,6 @@ client.get_messages do |msg, topic|
 end
 ```
 
-# Gracefully disconnect
+### Gracefully disconnect
 client.disconnect
 ```
