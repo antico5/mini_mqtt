@@ -102,7 +102,7 @@ module MiniMqtt
       end
 
       def generate_client_id
-        "client_#{ rand(10000).to_s }"
+        "client_#{ rand(10000000).to_s }"
       end
 
       def spawn_read_thread!
