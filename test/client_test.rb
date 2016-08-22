@@ -114,5 +114,17 @@ class ClientTest < MiniTest::Test
     end
     assert true
   end
+
+  def test_qos_1
+    @client.connect
+    @client.subscribe 'topic_qos' => 1
+    @client.publish 'topic_qos', 'msg', qos: 1
+    msg = @client.get_message
+    assert_equal 'topic_qos', msg.topic
+    assert_equal 'msg', msg.message
+    assert_equal 1, msg.qos
+    @client.disconnect
+  end
+  end
 end
 
