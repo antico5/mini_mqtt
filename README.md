@@ -4,13 +4,13 @@ A full ruby implementation of the client side of MQTT protocol.
 
 The philosophy behind this gem is to keep the code as minimal and tidy as possible, and to completely avoid dependencies.
 
-  cloc lib
-  
-  ---------------------------------------------------------------------
-  Language         files          blank        comment           code
-  ---------------------------------------------------------------------
-  Ruby                 6            103             14            449
-  ---------------------------------------------------------------------
+    cloc lib
+    
+    ---------------------------------------------------------------------
+    Language         files          blank        comment           code
+    ---------------------------------------------------------------------
+    Ruby                 6            103             14            449
+    ---------------------------------------------------------------------
 
 ## Installation
 
@@ -19,9 +19,9 @@ Clone this repo and include it to your load path. This project isn't published a
 ## How to test
 You need mosquitto server installed in order tu run integration tests.
 
-  sudo apt-get install mosquitto
-
-  rake test
+    sudo apt-get install mosquitto
+    
+    rake test
 
 ## Usage
 
