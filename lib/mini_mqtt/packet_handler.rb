@@ -40,10 +40,14 @@ module MiniMqtt
       #Decode length using algorithm, and read packet body.
       length = decode_length @stream
       encoded_packet = @stream.read length
-      log 'IN', packet_class, encoded_packet
+      log_packet 'IN', packet_class, encoded_packet
 
       # Create appropiate packet instance and decode the packet body.
       packet_class.new.decode StringIO.new(encoded_packet), flags
+
+    rescue StandardError => e
+      log "Exception while receiving: #{ e.inspect }"
+      @stream.close
     end
 
     def write_packet packet
@@ -53,10 +57,13 @@ module MiniMqtt
         type_and_flags += packet.flags
         @stream.write uchar(type_and_flags)
         encoded_packet = packet.encode
-        log 'OUT', packet.class, encoded_packet
+        log_packet 'OUT', packet.class, encoded_packet
         @stream.write encode_length(encoded_packet.length)
         @stream.write encoded_packet
       end
+    rescue StandardError => e
+      log "Exception while receiving: #{ e.inspect }"
+      @stream.close
     end
 
     private
@@ -85,9 +92,13 @@ module MiniMqtt
       length
     end
 
-    def log flow, type, message
+    def log_packet flow, type, message
+      log "\n#{ flow } - #{ type.to_s } - #{ message.inspect }\n"
+    end
+
+    def log text
       if @@debug
-        puts "\n#{ flow } - #{ type.to_s } - #{ message.inspect }\n"
+        puts text
       end
     end
   end
