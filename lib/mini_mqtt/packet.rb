@@ -49,6 +49,22 @@ module MiniMqtt
 
   end
 
+  module AckPacket
+    attr_accessor :packet_id
+
+    def initialize params = {}
+      @packet_id = params[:packet_id]
+    end
+
+    def read_variable_header
+      @packet_id = read_ushort @stream
+    end
+
+    def build_variable_header
+      ushort @packet_id
+    end
+  end
+
   class ConnackPacket < Packet
     attr_reader :return_code
 
@@ -131,31 +147,23 @@ module MiniMqtt
   end
 
   class PubackPacket < Packet
-    attr_accessor :packet_id
-
-    def initialize params = {}
-      @packet_id = params[:packet_id]
-    end
-
-    def read_variable_header
-      @packet_id = read_ushort @stream
-    end
-
-    def build_variable_header
-      ushort @packet_id
-    end
+    include AckPacket
   end
 
-  class PubrecPacket < PubackPacket
+  class PubrecPacket < Packet
+    include AckPacket
   end
 
-  class PubrelPacket < PubackPacket
+  class PubrelPacket < Packet
+    include AckPacket
+
     def flags
       0b0010
     end
   end
 
-  class PubcompPacket < PubackPacket
+  class PubcompPacket < Packet
+    include AckPacket
   end
 
   class SubscribePacket < Packet
@@ -216,7 +224,8 @@ module MiniMqtt
     end
   end
 
-  class UnsubackPacket < PubackPacket
+  class UnsubackPacket < Packet
+    include AckPacket
   end
 
   class PingreqPacket < Packet
