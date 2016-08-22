@@ -2,7 +2,7 @@ require 'socket'
 
 module MiniMqtt
   class Client
-    attr_accessor :host, :port, :user, :password, :clean_session
+    attr_accessor :host, :port, :user, :password, :clean_session, :client_id
 
     def initialize params = {}
       @host = params[:host] || localhost
