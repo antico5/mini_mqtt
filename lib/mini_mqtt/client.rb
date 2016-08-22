@@ -49,6 +49,11 @@ module MiniMqtt
       send_packet packet
     end
 
+    def unsubscribe *topics
+      packet = UnsubscribePacket.new topics: topics
+      send_packet packet
+    end
+
     def publish topic, message, options = {}
       packet = PublishPacket.new topic: topic, message: message.to_s,
         retain: options[:retain]
