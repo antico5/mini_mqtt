@@ -28,10 +28,9 @@ class ClientTest < MiniTest::Test
     @client.connect
     @client.subscribe '/test'
     @client.publish '/test', 'hi'
-    @client.get_message do |msg, topic|
-      assert_equal '/test', topic
-      assert_equal 'hi', msg
-    end
+    msg = @client.get_message
+    assert_equal '/test', msg.topic
+    assert_equal 'hi', msg.message
     @client.disconnect
   end
 
@@ -40,11 +39,9 @@ class ClientTest < MiniTest::Test
     @client.subscribe '/test1', '/test2'
     @client.publish '/test1', 'message_1'
     @client.publish '/test2', 'message_2'
-    received = []
-    2.times do
-      @client.get_message { |msg| received << msg }
-    end
-    assert_equal ['message_1', 'message_2'], received
+    assert_equal 'message_1', @client.get_message.message
+    assert_equal 'message_2', @client.get_message.message
+    @client.disconnect
   end
 
   def test_unsubscribe
@@ -54,8 +51,7 @@ class ClientTest < MiniTest::Test
     @client.publish '/test', 'hi'
     assert_raises(Timeout::Error) do
       Timeout::timeout(1) do
-        @client.get_message do |msg, topic|
-        end
+        @client.get_message
       end
     end
     @client.disconnect
@@ -66,9 +62,7 @@ class ClientTest < MiniTest::Test
     message_to_retain = rand.to_s
     @client.publish '/retain', message_to_retain, retain: true
     @client.subscribe '/retain'
-    @client.get_message do |msg|
-      assert_equal message_to_retain, msg
-    end
+    assert_equal message_to_retain, @client.get_message.message
     @client.disconnect
   end
 
@@ -79,9 +73,7 @@ class ClientTest < MiniTest::Test
     @client.disconnect
     @client.connect
     @client.publish '/test', 'hello'
-    @client.get_message do |msg|
-      assert_equal 'hello', msg
-    end
+    assert_equal 'hello', @client.get_message.message
     @client.disconnect
   end
 
@@ -93,9 +85,7 @@ class ClientTest < MiniTest::Test
     @client.connect will_topic: 'last_will', will_message: 'help!!'
     # abruptly close connection by closing socket.
     @client.instance_variable_get(:@socket).close
-    @client2.get_message do |msg|
-      assert_equal 'help!!', msg
-    end
+    assert_equal 'help!!', @client2.get_message.message
     @client2.disconnect
   end
 
@@ -107,9 +97,7 @@ class ClientTest < MiniTest::Test
     @client.instance_variable_get(:@socket).close
     @client.connect
     @client.subscribe 'last_will_retain'
-    @client.get_message do |msg|
-      assert_equal msg, will_msg
-    end
+    assert_equal will_msg, @client.get_message.message
     @client.disconnect
   end
 end

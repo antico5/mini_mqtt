@@ -50,8 +50,7 @@ module MiniMqtt
     end
 
     def unsubscribe *topics
-      packet = UnsubscribePacket.new topics: topics
-      send_packet packet
+      send_packet UnsubscribePacket.new topics: topics
     end
 
     def publish topic, message, options = {}
@@ -69,8 +68,7 @@ module MiniMqtt
     end
 
     def get_message
-      message = @received_messages.pop
-      yield message.message, message.topic
+      @received_messages.pop
     end
 
     def connected?
@@ -80,21 +78,11 @@ module MiniMqtt
     private
 
       def send_packet packet
-        begin
-          @packet_handler.write_packet packet
-        rescue StandardError => e
-          puts "Exception while sending packet: #{ e.inspect }"
-          @socket.close
-        end
+        @packet_handler.write_packet packet
       end
 
       def receive_packet
-        begin
-          @packet_handler.get_packet
-        rescue StandardError => e
-          puts "Exception while receiving: #{ e.inspect }"
-          @socket.close
-        end
+        @packet_handler.get_packet
       end
 
       def handle_received_packet packet
@@ -123,8 +111,8 @@ module MiniMqtt
           while connected? do
             send_packet PingreqPacket.new
             sleep @keep_alive
-            if Time.now - @last_ping_response > @keep_alive
-              puts "Error: Server not responding to ping. Disconnecting."
+            if Time.now - @last_ping_response > 2 * @keep_alive
+              puts "Error: MQTT Server not responding to ping. Disconnecting."
               @socket.close
             end
           end
