@@ -103,5 +103,16 @@ class ClientTest < MiniTest::Test
     assert_equal will_msg, @client.get_message.message
     @client.disconnect
   end
+
+  def test_get_messages_breaks_when_connection_error
+    @client.connect
+    Thread.new do
+      sleep 0.5
+      @client.instance_variable_get(:@socket).close
+    end
+    @client.get_messages do |message|
+    end
+    assert true
+  end
 end
 

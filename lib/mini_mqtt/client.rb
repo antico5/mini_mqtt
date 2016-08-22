@@ -109,6 +109,7 @@ module MiniMqtt
           while connected? do
             handle_received_packet receive_packet
           end
+          @received_messages.close
         end
       end
 
