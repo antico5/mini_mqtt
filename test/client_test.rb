@@ -125,6 +125,5 @@ class ClientTest < MiniTest::Test
     assert_equal 1, msg.qos
     @client.disconnect
   end
-  end
 end
 
