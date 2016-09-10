@@ -1,3 +1,5 @@
+require 'stringio'
+
 module MiniMqtt
   PACKET_CLASSES = { 1 => ConnectPacket,
                      2 => ConnackPacket,
