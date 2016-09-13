@@ -1,8 +1,10 @@
+require 'simplecov'
+SimpleCov.start
+
 $:.unshift File.join( __FILE__, "..", "..", "lib")
 require 'pry'
 require 'mini_mqtt'
 require 'minitest/autorun'
-
 
 class String
   def to_stream
