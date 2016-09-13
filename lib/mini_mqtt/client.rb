@@ -44,7 +44,7 @@ module MiniMqtt
       topics = params.map do |arg|
         arg.is_a?(Hash) ? arg : { arg => 0 }
       end
-      topics = topics.inject &:merge
+      topics = topics.inject :merge
       packet = SubscribePacket.new topics: topics
       send_packet packet
     end
@@ -71,7 +71,7 @@ module MiniMqtt
       @received_messages.pop
     end
 
-    def get_messages &b
+    def get_messages
       while message = get_message
         yield message.message, message.topic
       end
@@ -107,7 +107,7 @@ module MiniMqtt
       end
 
       def generate_client_id
-        "client_#{ rand(10000000).to_s }"
+        "client_#{ rand(10000000) }"
       end
 
       def spawn_read_thread!

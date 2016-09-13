@@ -95,11 +95,11 @@ module MiniMqtt
     end
 
     def log_in_packet type, message
-      log "\nIN - #{ type.to_s } - #{ message.inspect }\n"
+      log "\nIN - #{ type } - #{ message.inspect }\n"
     end
 
     def log_out_packet packet
-      log "\nOUT - #{ packet.class.to_s } - #{ packet.instance_variable_get :@packet_id } - #{ packet.encode.inspect }\n"
+      log "\nOUT - #{ packet.class } - #{ packet.instance_variable_get :@packet_id } - #{ packet.encode.inspect }\n"
     end
 
     def log text

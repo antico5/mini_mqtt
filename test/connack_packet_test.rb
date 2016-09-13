@@ -13,6 +13,6 @@ class ConnackPacketTest < MiniTest::Test
     packet.decode "\x00\x04".to_stream
     assert_equal false, packet.session_present?
     assert_equal false, packet.accepted?
-    assert_match /bad username or password/, packet.error_message
+    assert_match(/bad username or password/, packet.error_message)
   end
 end
