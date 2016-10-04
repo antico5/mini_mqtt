@@ -1,3 +1,7 @@
+[![Code Climate](https://codeclimate.com/github/antico5/mini_mqtt/badges/gpa.svg)](https://codeclimate.com/github/antico5/mini_mqtt)
+[![Test Coverage](https://codeclimate.com/github/antico5/mini_mqtt/badges/coverage.svg)](https://codeclimate.com/github/antico5/mini_mqtt/coverage)
+[![Issue Count](https://codeclimate.com/github/antico5/mini_mqtt/badges/issue_count.svg)](https://codeclimate.com/github/antico5/mini_mqtt)
+
 # MiniMqtt
 
 A full ruby implementation of the client side of MQTT protocol. 
