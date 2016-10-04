@@ -9,30 +9,23 @@ A full ruby implementation of the client side of MQTT protocol.
 
 The philosophy behind this gem is to keep the code as minimal and tidy as possible, and to completely avoid dependencies.
 
-    cloc lib
-    
-    ---------------------------------------------------------------------
-    Language         files          blank        comment           code
-    ---------------------------------------------------------------------
-    Ruby                 6            103             14            449
-    ---------------------------------------------------------------------
 
 ## Features
 
 * Supports all MQTT features up to QoS 1.
-* Doesn't support websockets.
-* Doesn't store messages once the connection has been closed.
+* 450 lines of code
+* 98% test coverage
+* Doesn't store messages once the connection has been closed/lost.
 
 ## Installation
 
-Clone this repo and include it to your load path. This project isn't published at rubygems yet.
+`gem 'mini_mqtt'`
+
 
 ## How to test
-You need mosquitto server installed in order to run integration tests.
+Integration tests will hit mosquitto's test broker test.mosquitto.org.
 
-    sudo apt-get install mosquitto
-    
-    rake test
+`rake test`
 
 ## Usage
 
@@ -90,7 +83,7 @@ client.subscribe '/topic', '/qos_topic' => 1
 ```
 
 ### Get messages
-The caller of these methods are blocked until a message arrives, or the connection is lost.
+The caller of these methods is blocked until a message arrives, or the connection is lost.
 
 ```ruby
 # Get a single message
@@ -104,5 +97,6 @@ end
 ```
 
 ### Gracefully disconnect
+```ruby
 client.disconnect
 ```
