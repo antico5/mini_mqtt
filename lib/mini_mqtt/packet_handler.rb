@@ -1,22 +1,6 @@
 require 'stringio'
 
 module MiniMqtt
-  PACKET_CLASSES = { 1 => ConnectPacket,
-                     2 => ConnackPacket,
-                     3 => PublishPacket,
-                     4 => PubackPacket,
-                     5 => PubrecPacket,
-                     6 => PubrelPacket,
-                     7 => PubcompPacket,
-                     8 => SubscribePacket,
-                     9 => SubackPacket,
-                     10 => UnsubscribePacket,
-                     11 => UnsubackPacket,
-                     12 => PingreqPacket,
-                     13 => PingrespPacket,
-                     14 => DisconnectPacket }
-  PACKET_CODES = PACKET_CLASSES.invert
-
   class PacketHandler
     include BinHelper
 
@@ -36,7 +20,7 @@ module MiniMqtt
     def get_packet
       # First byte contains packet type and flags. 4 bits each.
       first_byte = @stream.readbyte
-      packet_class = PACKET_CLASSES[ first_byte >> 4 ]
+      packet_class = Packet.get_packet_class(first_byte >> 4)
       flags = first_byte & 0xf
 
       #Decode length using algorithm, and read packet body.
@@ -55,7 +39,7 @@ module MiniMqtt
     def write_packet packet
       # Write type and flags, then encoded packet length, then packet
       @mutex.synchronize do
-        type_and_flags = PACKET_CODES[packet.class] << 4
+        type_and_flags = packet.class.packet_type_id << 4
         type_and_flags += packet.flags
         @stream.write uchar(type_and_flags)
         encoded_packet = packet.encode

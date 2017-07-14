@@ -5,6 +5,7 @@ module MiniMqtt
     include BinHelper
 
     @@last_packet_id = 0
+    @@packet_classes = {}
 
     def decode stream, flags = 0
       @stream = stream
@@ -22,7 +23,20 @@ module MiniMqtt
       0b000
     end
 
+    def self.packet_type_id
+      @packet_type_id
+    end
+
+    def self.get_packet_class packet_type_id
+      @@packet_classes[packet_type_id]
+    end
+
     private
+
+    def self.register_packet_type packet_type_id
+      @packet_type_id = packet_type_id
+      @@packet_classes[packet_type_id] = self
+    end
 
     def new_packet_id
       @@last_packet_id += 1
@@ -66,6 +80,7 @@ module MiniMqtt
 
   class ConnackPacket < Packet
     attr_reader :return_code
+    register_packet_type 2
 
     ERRORS = { 1 => "unacceptable protocol version",
                2 => "identifier rejected",
@@ -94,6 +109,7 @@ module MiniMqtt
 
   class PublishPacket < Packet
     attr_accessor :dup, :qos, :retain, :packet_id, :topic, :message
+    register_packet_type 3
 
     def handle_flags flags
       @dup = flags & 0b1000 != 0
@@ -145,14 +161,17 @@ module MiniMqtt
 
   class PubackPacket < Packet
     include AckPacket
+    register_packet_type 4
   end
 
   class PubrecPacket < Packet
     include AckPacket
+    register_packet_type 5
   end
 
   class PubrelPacket < Packet
     include AckPacket
+    register_packet_type 6
 
     def flags
       0b0010
@@ -161,10 +180,12 @@ module MiniMqtt
 
   class PubcompPacket < Packet
     include AckPacket
+    register_packet_type 7
   end
 
   class SubscribePacket < Packet
     attr_accessor :packet_id, :topics
+    register_packet_type 8
 
     def initialize params = {}
       @topics = params[:topics]
@@ -188,6 +209,7 @@ module MiniMqtt
 
   class SubackPacket < Packet
     attr_accessor :packet_id, :max_qos_accepted
+    register_packet_type 9
 
     def read_variable_header
       @packet_id = read_ushort @stream
@@ -200,6 +222,7 @@ module MiniMqtt
 
   class UnsubscribePacket < Packet
     attr_accessor :packet_id, :topics
+    register_packet_type 10
 
     def flags
       0b0010
@@ -223,14 +246,18 @@ module MiniMqtt
 
   class UnsubackPacket < Packet
     include AckPacket
+    register_packet_type 11
   end
 
   class PingreqPacket < Packet
+    register_packet_type 12
   end
 
   class PingrespPacket < Packet
+    register_packet_type 13
   end
 
   class DisconnectPacket < Packet
+    register_packet_type 14
   end
 end

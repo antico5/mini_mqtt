@@ -1,5 +1,7 @@
 module MiniMqtt
   class ConnectPacket < Packet
+    register_packet_type 1
+
     def initialize options = {}
       @user = options[:user]
       @password = options[:password]
