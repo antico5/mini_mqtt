@@ -4,7 +4,7 @@
 
 Gem::Specification.new do |gem|
   gem.name        = 'mini_mqtt'
-  gem.version     = '0.1.0'
+  gem.version     = '0.1.1'
   gem.author      = 'Armando Andini'
   gem.email       = 'armando.andini@hotmail.com'
   gem.homepage    = 'http://github.com/antico5/mini_mqtt'
