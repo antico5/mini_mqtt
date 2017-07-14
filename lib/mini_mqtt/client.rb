@@ -17,16 +17,16 @@ module MiniMqtt
     def connect options = {}
       # Create socket and packet handler
       @socket = TCPSocket.new @host, @port
-      @packet_handler = PacketHandler.new @socket
+      @handler = PacketHandler.new @socket
 
       # Send ConnectPacket
-      send_packet ConnectPacket.new user: @user,
+      @handler.write_packet ConnectPacket.new user: @user,
         password: @password, keep_alive: @keep_alive, client_id: @client_id,
         clean_session: @clean_session, will_topic: options[:will_topic],
         will_message: options[:will_message], will_retain: options[:will_retain]
 
       # Receive connack packet
-      connack = receive_packet
+      connack = @handler.get_packet
 
       if connack.accepted?
         @received_messages = Queue.new
@@ -46,22 +46,22 @@ module MiniMqtt
       end
       topics = topics.inject :merge
       packet = SubscribePacket.new topics: topics
-      send_packet packet
+      @handler.write_packet packet
     end
 
     def unsubscribe *topics
-      send_packet UnsubscribePacket.new topics: topics
+      @handler.write_packet UnsubscribePacket.new topics: topics
     end
 
     def publish topic, message, options = {}
       packet = PublishPacket.new topic: topic, message: message.to_s,
         retain: options[:retain], qos: options[:qos]
-      send_packet packet
+      @handler.write_packet packet
     end
 
     def disconnect
       # Send DisconnectPacket, then kill threads and close socket
-      send_packet DisconnectPacket.new
+      @handler.write_packet DisconnectPacket.new
       @read_thread.kill
       @keepalive_thread.kill
       @socket.close
@@ -83,14 +83,6 @@ module MiniMqtt
 
     private
 
-      def send_packet packet
-        @packet_handler.write_packet packet
-      end
-
-      def receive_packet
-        @packet_handler.get_packet
-      end
-
       def handle_received_packet packet
         case packet
         when PingrespPacket
@@ -99,7 +91,7 @@ module MiniMqtt
         when PublishPacket
           @received_messages << packet
           if packet.qos > 0
-            send_packet PubackPacket.new packet_id: packet.packet_id
+            @handler.write_packet PubackPacket.new packet_id: packet.packet_id
           end
 
         when PubackPacket
@@ -113,7 +105,7 @@ module MiniMqtt
       def spawn_read_thread!
         @read_thread = Thread.new do
           while connected? do
-            handle_received_packet receive_packet
+            handle_received_packet @handler.get_packet
           end
           @received_messages << nil
         end
@@ -122,7 +114,7 @@ module MiniMqtt
       def spawn_keepalive_thread!
         @keepalive_thread = Thread.new do
           while connected? do
-            send_packet PingreqPacket.new
+            @handler.write_packet PingreqPacket.new
             sleep @keep_alive
             if Time.now - @last_ping_response > 2 * @keep_alive
               puts "Error: MQTT Server not responding to ping. Disconnecting."
