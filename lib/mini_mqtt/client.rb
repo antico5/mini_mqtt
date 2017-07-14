@@ -83,45 +83,43 @@ module MiniMqtt
 
     private
 
-      def handle_received_packet packet
-        case packet
-        when PingrespPacket
-          @last_ping_response = Time.now
-
-        when PublishPacket
-          @received_messages << packet
-          if packet.qos > 0
-            @handler.write_packet PubackPacket.new packet_id: packet.packet_id
-          end
-
-        when PubackPacket
+    def handle_received_packet packet
+      case packet
+      when PingrespPacket
+        @last_ping_response = Time.now
+      when PublishPacket
+        @received_messages << packet
+        if packet.qos > 0
+          @handler.write_packet PubackPacket.new packet_id: packet.packet_id
         end
+      when PubackPacket
       end
+    end
 
-      def generate_client_id
-        "client_#{ rand(10000000) }"
-      end
+    def generate_client_id
+      "client_#{ rand(10000000) }"
+    end
 
-      def spawn_read_thread!
-        @read_thread = Thread.new do
-          while connected? do
-            handle_received_packet @handler.get_packet
-          end
-          @received_messages << nil
+    def spawn_read_thread!
+      @read_thread = Thread.new do
+        while connected? do
+          handle_received_packet @handler.get_packet
         end
+        @received_messages << nil
       end
+    end
 
-      def spawn_keepalive_thread!
-        @keepalive_thread = Thread.new do
-          while connected? do
-            @handler.write_packet PingreqPacket.new
-            sleep @keep_alive
-            if Time.now - @last_ping_response > 2 * @keep_alive
-              puts "Error: MQTT Server not responding to ping. Disconnecting."
-              @socket.close
-            end
+    def spawn_keepalive_thread!
+      @keepalive_thread = Thread.new do
+        while connected? do
+          @handler.write_packet PingreqPacket.new
+          sleep @keep_alive
+          if Time.now - @last_ping_response > 2 * @keep_alive
+            puts "Error: MQTT Server not responding to ping. Disconnecting."
+            @socket.close
           end
         end
       end
+    end
   end
 end

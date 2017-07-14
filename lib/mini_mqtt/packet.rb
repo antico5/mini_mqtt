@@ -24,29 +24,28 @@ module MiniMqtt
 
     private
 
-      def new_packet_id
-        @@last_packet_id += 1
-        @@last_packet_id %= 65535
-        1 + @@last_packet_id
-      end
+    def new_packet_id
+      @@last_packet_id += 1
+      @@last_packet_id %= 65535
+      1 + @@last_packet_id
+    end
 
-      def read_variable_header
-      end
+    def read_variable_header
+    end
 
-      def read_payload
-      end
+    def read_payload
+    end
 
-      def handle_flags flags
-      end
+    def handle_flags flags
+    end
 
-      def build_variable_header
-        ""
-      end
+    def build_variable_header
+      ""
+    end
 
-      def build_payload
-        ""
-      end
-
+    def build_payload
+      ""
+    end
   end
 
   module AckPacket
@@ -91,7 +90,6 @@ module MiniMqtt
     def error_message
       ERRORS[@return_code]
     end
-
   end
 
   class PublishPacket < Packet
@@ -143,7 +141,6 @@ module MiniMqtt
     def build_payload
       @message
     end
-
   end
 
   class PubackPacket < Packet
