@@ -29,8 +29,7 @@ module MiniMqtt
     end
 
     def build_payload
-      payload = ""
-      payload << mqtt_utf8_encode(@client_id)
+      payload = mqtt_utf8_encode(@client_id)
       if @will_message
         payload << mqtt_utf8_encode(@will_topic)
         payload << mqtt_utf8_encode(@will_message)
