@@ -44,7 +44,7 @@ module MiniMqtt
         @stream.write uchar(type_and_flags)
         encoded_packet = packet.encode
         log_out_packet packet
-        @stream.write encode_length(encoded_packet.length)
+        @stream.write encode_length(encoded_packet.bytesize)
         @stream.write encoded_packet
       end
     rescue StandardError => e
