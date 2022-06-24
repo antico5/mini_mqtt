@@ -17,7 +17,7 @@ module BinHelper
   end
 
   def mqtt_utf8_encode string
-    ushort(string.length) + string
+    ushort(string.bytesize) + string
   end
 
   def read_mqtt_encoded_string stream
